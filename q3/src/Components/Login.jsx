@@ -14,7 +14,7 @@ const Login = () => {
     const handleSubmit = (event) => {
       event.preventDefault();
       console.log(inputs);
-      alert(inputs);
+      alert('Login Successful');
     }
   return (
     <div className='section'>

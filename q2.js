@@ -1,28 +1,25 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const WorksnapsTimeEntrySchema = new Schema({
+const WorksnapsTimeEntry = mongoose.model('WorksnapsTimeEntry', new mongoose.Schema({
   student: {
-    type: Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Student'
   },
   timeEntries: {
     type: Object
   }
-});
+}));
 
-const StudentSchema = new Schema({
+const Student = mongoose.model('Student', new mongoose.Schema({
   firstName: {
     type: String,
     trim: true,
     default: ''
-    // validate: [validateLocalStrategyProperty, 'Please fill in your first name']
   },
   lastName: {
     type: String,
     trim: true,
     default: ''
-    // validate: [validateLocalStrategyProperty, 'Please fill in your last name']
   },
   displayName: {
     type: String,
@@ -31,23 +28,19 @@ const StudentSchema = new Schema({
   municipality: {
     type: String
   }
-});
+}));
 
+mongoose.connect('mongodb://127.0.0.1:27017/', { useNewUrlParser: true });
 
-const WorksnapsTimeEntry = mongoose.model('WorksnapsTimeEntry', WorksnapsTimeEntrySchema);
-const Student = mongoose.model('Student', StudentSchema);
+async function showStudentTimeEntries() {
+  const students = await Student.find();
 
-WorksnapsTimeEntry.find()
-  .populate('student')
-  .exec((err, timeEntries) => {
-    if (err) {
-      console.log('Error:', err);
-      return;
-    }
+  for (const student of students) {
+    const timeEntries = await WorksnapsTimeEntry.find({ student: student._id });
+    console.log(`Time entries for ${student.firstName} ${student.lastName}:`, timeEntries);
+  }
 
-    timeEntries.forEach((timeEntry) => {
-      console.log(`${timeEntry.student.firstName} ${timeEntry.student.lastName}:`);
-      console.log(timeEntry.timeEntries);
-      console.log('---');
-    });
-  });
+  mongoose.disconnect();
+}
+
+showStudentTimeEntries();
